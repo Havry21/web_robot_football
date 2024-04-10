@@ -2,6 +2,8 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
+import socket
+
 import random
 import time
 from flask import Flask, render_template, request
@@ -13,7 +15,7 @@ app = Flask(__name__, template_folder="/home/dima/ros2_ws/src/web_robot_footbot/
 
 class Robot:
     robotIndex = '_1'
-    robot_ip_address = 192
+    robot_ip_address = "127.0.0.1"
     robot_id = 12345
     first_motor_speed = 0
     second_motor_speed = 0
@@ -32,7 +34,11 @@ class Robot:
         self.third_motor_speed = random.randint(0, 100)
         self.kicker_status = random.randint(0, 100)
         self.battery_life = random.randint(0, 100)
-
+        if random.randint(0,1) == 1:
+            self.status = "Connected"
+        else:
+            self.status = "Offline"
+            
     def generateJson(self):
         file = jsonify({
             'robot_ip_address': self.robot_ip_address,
@@ -41,7 +47,8 @@ class Robot:
             'second_motor_speed': self.second_motor_speed,
             'third_motor_speed': self.third_motor_speed,
             'kicker_status': self.kicker_status,
-            'battery_life': self.battery_life
+            'battery_life': self.battery_life,
+            'status': self.status   
         })
         return file
 
