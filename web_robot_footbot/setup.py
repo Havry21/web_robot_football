@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'web = web_robot_footbot.app:main',
+            'udpSender = web_robot_footbot.udpSender:main',
         ],
     },
 )

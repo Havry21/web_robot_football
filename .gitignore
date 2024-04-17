@@ -1,1 +1,6 @@
 /__pycache__
+build
+install
+log 
+test2
+trajectory_with_slam
