@@ -1,29 +1,37 @@
+import copy
 import socket
 import struct
 import time
 import threading
+from Robot import RobotData
 
 
-class UDPConvers:
+class SingletonMeta(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
+
+
+class UDPConvers(metaclass=SingletonMeta):
     state = "idle"
     localPort = 5005
     broadCastPort = 5006
-    robot_ips = []
-    robotsData = []
+
     msg4 = struct.pack('!B', 3)
     msg1 = struct.pack('!B', 1)
 
+    robotsData = dict()
+    prev_robots_data = dict()
+
     def __init__(self):
-
+        print("Construct class")
         self.localSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.localSock.setsockopt(
-            socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.localSock.bind(('', self.localPort))
-
-        self.broadCastSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.broadCastSock.setsockopt(
-            socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.broadCastSock.bind(("0.0.0.0", self.broadCastPort))
+        self.localSock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.localSock.bind(("0.0.0.0", self.localPort))
 
     def stopSession(self):
         print("Stop session")
@@ -35,64 +43,66 @@ class UDPConvers:
 
     def init(self):
         print("Start init")
-        self.broadCastSock.sendto(
-            self.msg1, ('<broadcast>', self.broadCastPort))
         start_time = time.time()
-        self.broadCastSock.settimeout(1.0)
         responses = 0
+        self.localSock.sendto(self.msg1, ('<broadcast>', self.localPort))
 
-        while responses < 5 and time.time() - start_time < 5:
+        while responses < 1: #and time.time() - start_time < 10:
+            self.localSock.settimeout(2.0)
             try:
-                data, addr = self.broadCastSock.recvfrom(1024)
-                if (data[0] == 2):
-                    print(
-                        f"Received valid response from {addr} and address of robot - {data[1]}")
+                data, addr = self.localSock.recvfrom(1024)
+                if data[0] == 2:
+                    print(f"Received valid response from {addr} and address of robot - {data[1]}")
                     responses += 1
-                    recMsg = Robotdata
-                    recMsg.robot_id = data[1]
-                    recMsg.robot_ip = addr
-                    self.robotsData.append(recMsg)
-                    # self.robot_ips.append(addr)
-                    break
+                    _robotData = RobotData()
+                    _robotData.status = 1
+                    _robotData.robot_id = data[1]
+                    _robotData.robot_ip = addr[0]
+                    self.robotsData[data[1]] = copy.deepcopy(_robotData)
+                    print(data[1])
+
             except socket.timeout:
                 print("Error in receive")
 
-        if (responses != 0):
+        self.prev_robots_data = copy.deepcopy(self.robotsData)
+        if responses != 0:
             self.state = "work"
-        time.sleep(5)
+        time.sleep(1)
 
     def work(self):
-        start_time = time.time()
+        self.start_time = time.time()
         self.localSock.settimeout(1.0)  # set timeout to 1 second
 
-        while True:
+        for key, data in self.robotsData.items():
+            if data != self.prev_robots_data[key]:
+                print(f"send msg1 to {data.robot_ip}")
+                try:
+                    msg = struct.pack('!bbbB', data.first_motor_speed, data.second_motor_speed, data.third_motor_speed,
+                                  data.kicker)
+                    self.localSock.sendto(msg, (data.robot_ip, self.localPort))
+                except Exception:
+                    pass
 
-            for data in self.robotsData:
-                msg = struct.pack('!BBBB', data.first_motor_speed,
-                                  data.second_motor_speed, data.third_motor_speed, data.kicker)
-                self.localSock.sendto(msg, (data.robot_ip, self.localPort))
-
-            time.sleep(0.05)  # wait for 10 milliseconds
-
-            if time.time() - start_time >= 5:
-                for robot in self.robotsData:
-                    self.localSock.sendto(
-                        self.msg4, (robot.robot_ip, self.localPort))
+        if time.time() - self.start_time >= 5:
+            for key, robot in self.robotsData.items():
+                if robot != self.prev_robots_data[key]:
+                    self.localSock.sendto(self.msg4, (robot.robot_ip, self.localPort))
                     try:
                         data, addr = self.localSock.recvfrom(1024)
-                        if (data[0] == 2):
-                            print(
-                                f"Received valid response from {addr} and address of robot - {data[1]}")
+                        if data[0] == 2:
+                            print(f"Received valid response from {addr} and address of robot - {data[1]}")
                             robot.battery = data[2]
+                        self.start_time = time.time()
                     except socket.timeout:
                         print("Error in receive")
                         self.startSession()
-                start_time = time.time()
 
+        self.prev_robots_data = copy.deepcopy(self.robotsData)
     def stateMachine(self):
+        time.sleep(1)
         start_time = time.time()
 
-        while (1):
+        while True:
             match self.state:
                 case "idle":
                     self.startSession()
@@ -103,14 +113,6 @@ class UDPConvers:
 
             if time.time() - start_time >= 20:
                 print(self.state)
+                start_time = time.time()
 
             time.sleep(0.01)
-
-
-def main(args=None):
-    udpConvers = UDPConvers()
-    threading.Thread(target=udpConvers.stateMachine).start()
-
-
-if __name__ == '__main__':
-    main()

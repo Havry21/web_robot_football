@@ -3,7 +3,7 @@
 function updateParameters() {
     const id = ['_0','_1','_2','_3','_4'];
     for(let i=0; i<5; i++){
-        fetch('/get_parameters' + id[i])
+        fetch('http://127.0.0.1:5000/get_parameters' + id[i])
         .then(response => response.json())
         .then(data => {
             document.getElementById('ip_address'+id[i]).textContent = data.robot_ip_address;
@@ -14,7 +14,14 @@ function updateParameters() {
             document.getElementById('kicker_status'+id[i]).textContent = data.kicker_status;
             document.getElementById('battery_life'+id[i]).textContent = data.battery_life;
         });
+
+//        const text = document.getElementById('status'+id[i]);
+//        if(text.textContent === 1){
+//            text.style.color = 'green';
+//        } else {
+//            text.style.color = 'red';
+//        }
     }
 }
 // Call updateParameters every second
-setInterval(updateParameters, 1000);
+setInterval(updateParameters, 100);

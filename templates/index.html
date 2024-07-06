@@ -8,14 +8,21 @@
 </head>
 
 <body>
-
     <div class="headerLine">
         <h1>Robot Parameters</h1>
     </div>
-
-    <div class="grid-container">
+    <!-- <div class="tabs">
+        <div class="tab" id="tab0">Tab 1</div>
+        <div class="tab" id="tab1">Tab 2</div>
+        <div class="tab" id="tab2">Tab 3</div>
+        <div class="tab" id="tab3">Tab 4</div>
+        <div class="tab" id="tab4">Tab 5</div>
+        <div class="tab" id="tabAll">Show All</div>
+      </div> -->
+      
+      <div class="grid-container">
         <div class="grid-item">
-            <div class="parameters-block">
+            <div class="parameters-block" id="parameters-block0">
                 <p>Robot IP Address: <span id="ip_address_0">{{ robot_ip_address }}</span></p>
                 <p>Robot ID: <span id="robot_id_0">{{ robot_id }}</span></p>
                 <p>First Motor Speed: <span id="first_motor_speed_0">{{ first_motor_speed }}</span></p>
@@ -26,7 +33,7 @@
             </div>
         </div>
         <div class="grid-item">
-            <div class="parameters-block">
+            <div class="parameters-block" id="parameters-block1">
                 <p>Robot IP Address: <span id="ip_address_1">{{ robot_ip_address }}</span></p>
                 <p>Robot ID: <span id="robot_id_1">{{ robot_id }}</span></p>
                 <p>First Motor Speed: <span id="first_motor_speed_1">{{ first_motor_speed }}</span></p>
@@ -37,7 +44,7 @@
             </div>
         </div>
         <div class="grid-item">
-            <div class="parameters-block">
+            <div class="parameters-block" id="parameters-block2">
                 <p>Robot IP Address: <span id="ip_address_2">{{ robot_ip_address }}</span></p>
                 <p>Robot ID: <span id="robot_id_2">{{ robot_id }}</span></p>
                 <p>First Motor Speed: <span id="first_motor_speed_2">{{ first_motor_speed }}</span></p>
@@ -48,7 +55,7 @@
             </div>
         </div>
         <div class="grid-item">
-            <div class="parameters-block">
+            <div class="parameters-block" id="parameters-block3">
                 <p>Robot IP Address: <span id="ip_address_3">{{ robot_ip_address }}</span></p>
                 <p>Robot ID: <span id="robot_id_3">{{ robot_id }}</span></p>
                 <p>First Motor Speed: <span id="first_motor_speed_3">{{ first_motor_speed }}</span></p>
@@ -58,8 +65,8 @@
                 <p>Battery Life: <span id="battery_life_3"> {{ battery_life }}</span></p>
             </div>
         </div>
-        <div class="grid-item">
-            <div class="parameters-block">
+        <!-- <div class="grid-item">
+            <div class="parameters-block" id="parameters-block4">
                 <p>Robot IP Address: <span id="ip_address_4">{{ robot_ip_address }}</span></p>
                 <p>Robot ID: <span id="robot_id_4">{{ robot_id }}</span></p>
                 <p>First Motor Speed: <span id="first_motor_speed_4">{{ first_motor_speed }}</span></p>
@@ -68,9 +75,44 @@
                 <p>Kicker Status: <span id="kicker_status_4">{{ kicker_status }}</span></p>
                 <p>Battery Life: <span id="battery_life_4"> {{ battery_life }}</span></p>
             </div>
-        </div>
+        </div> -->
 
     </div>
+
+
+      <!-- <script>
+
+            // Hide all parameters-blocks by default
+            document.querySelectorAll('.parameters-block').forEach(function(block) {
+            block.style.display = 'none';
+            });
+
+            // Show the first parameters-block by default
+            document.querySelectorAll('.parameters-block').forEach(function(block) {
+                    block.style.display = 'block';
+                });
+
+            // Add click event listeners to tabs
+            document.querySelectorAll('.tab').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                // If the clicked tab is 'Show All', display all blocks
+                if (this.id === 'tabAll') {
+                    document.querySelectorAll('.parameters-block').forEach(function(block) {
+                        block.style.display = 'block';
+                    });
+                } else {
+                    // Hide all parameters-blocks
+                    document.querySelectorAll('.parameters-block').forEach(function(block) {
+                        block.style.display = 'none';
+                    });
+                    // document.querySelectorAll('.grid-item').style.display = 'block';
+                    // Show the clicked parameters-block
+                    document.querySelector('#parameters-block' + this.id.replace('tab', '')).style.display = 'block';
+                }
+            });
+            });
+      </script> -->
+
 </body>
 
 </html>

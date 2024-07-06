@@ -1,61 +1,21 @@
 import socket
-import random
 import time
 from flask import Flask, render_template, request
 from flask import jsonify
 import threading
 
+from Robot import Robot, RobotData
+import Joystick
+import udpSender
+
 app = Flask(__name__)
 
-class Robot:
-    robotIndex = '_1'
-    def __init__(self, index):
-        self.robotIndex = index
-        self.status = 1
-        self.robot_id = 1
-        self.robot_ip = 1
-        self.first_motor_speed = 1
-        self.second_motor_speed = 1
-        self.third_motor_speed = 1
-        self.kicker = 1
-        self.battery = 1
-
-
-    def updParam(self):
-        self.robot_id = random.randint(0, 100)
-        self.robot_ip = random.randint(0, 100)
-        self.first_motor_speed = random.randint(0, 100)
-        self.second_motor_speed = random.randint(0, 100)
-        self.third_motor_speed = random.randint(0, 100)
-        self.kicker = random.randint(0, 100)
-        self.battery = random.randint(0, 100)
-        self.status = random.randint(0,1)
-        if self.status == 1:
-            self.status = "Connected"
-        else:
-            self.status = "Offline"
-            
-    def generateJson(self):
-        file = jsonify({
-            'robot_ip_address': self.robot_ip,
-            'robot_id': self.robot_id,
-            'first_motor_speed': self.first_motor_speed,
-            'second_motor_speed': self.second_motor_speed,
-            'third_motor_speed': self.third_motor_speed,
-            'kicker_status': self.kicker,
-            'battery_life': self.battery,
-            'status': self.status   
-        })
-        return file
-    
-    
-robotList = [Robot('_' + str(i)) for i in range(5)]
-
+robotList = [Robot("_0"), Robot("_1"), Robot("_2"), Robot("_3")]
 
 
 @app.route('/')
 def index():
-    return render_template('homePage.html')
+    return render_template('index.html')
 
 
 @app.route('/get_parameters_0', methods=['GET'])
@@ -65,7 +25,7 @@ def get_parameters_0():
 
 @app.route('/get_parameters_1', methods=['GET'])
 def get_parameters_1():
-    return robotList[2].generateJson()
+    return robotList[1].generateJson()
 
 
 @app.route('/get_parameters_2', methods=['GET'])
@@ -78,14 +38,48 @@ def get_parameters_3():
     return robotList[3].generateJson()
 
 
-@app.route('/get_parameters_4', methods=['GET'])
-def get_parameters_4():
-    return robotList[4].generateJson()
-
-
 def main(args=None):
-    threading.Thread(target=app.run(host='0.0.0.0', port=5000 ,debug=True)).start()
+    thread = list()
+    sender = udpSender.UDPConvers()
+    joysticks = Joystick.JoystickReader()
 
+    print("Start web")
+    thread.append(threading.Thread(target=app.run))
+
+    print("Start UDP")
+    thread.append(threading.Thread(target=sender.stateMachine, daemon=True))
+
+    print("Start joysticks")
+    thread.append(threading.Thread(target=joysticks.mainLoop, daemon=True))
+
+    for thr in thread:
+        thr.start()
+
+    print("Start loop")
+    start_time = time.time()
+
+    while True:
+        elapsed_time = time.time() - start_time
+        # print('Elapsed time: ', elapsed_time)
+        start_time = time.time()
+
+        if sender.state == "work":
+            i = 0
+            # get id, ip, state и battery
+            for key, data in sender.robotsData.items():
+                robotList[i].robotData = data
+                i += 1
+
+            # get speed and kicker
+            for i in range(len(joysticks.joysticks)):
+                robotList[i].updData(joysticks.joysticks[i])
+
+            # update data for udp sender
+            for robot in robotList:
+                if sender.robotsData.get(robot.robotData.robot_id) is not None:
+                    sender.robotsData[robot.robotData.robot_id] = robot.robotData
+
+        time.sleep(0.01)
 
 
 if __name__ == '__main__':

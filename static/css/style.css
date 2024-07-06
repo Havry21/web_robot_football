@@ -1,9 +1,16 @@
 .grid-container {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
   padding: 10px;
   column-gap: 50px;
   row-gap: 50px;
+}
+
+.grid-container > div {
+  background-color: #f4f4f4; /* Background color of the grid items */
+  border: 4px solid #3C454D;
+  border-radius: 10px;
+
 }
 
 body {
@@ -23,11 +30,9 @@ body {
 
 .parameters-block {
   background-color: #E1E6EB;
-  border: 4px solid #3C454D;
   margin: 1px;
   padding: 5px;
   height: auto;
-  border-radius: 10px;
 }
 
 h1 {
