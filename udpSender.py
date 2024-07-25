@@ -47,7 +47,7 @@ class UDPConvers(metaclass=SingletonMeta):
         responses = 0
         self.localSock.sendto(self.msg1, ('<broadcast>', self.localPort))
 
-        while responses < 1: #and time.time() - start_time < 10:
+        while responses < 2: #and time.time() - start_time < 10:
             self.localSock.settimeout(2.0)
             try:
                 data, addr = self.localSock.recvfrom(1024)
@@ -62,7 +62,9 @@ class UDPConvers(metaclass=SingletonMeta):
                     print(data[1])
 
             except socket.timeout:
+                self.localSock.sendto(self.msg1, ('<broadcast>', self.localPort))
                 print("Error in receive")
+
 
         self.prev_robots_data = copy.deepcopy(self.robotsData)
         if responses != 0:
