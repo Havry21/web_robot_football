@@ -46,27 +46,34 @@ def main(args=None):
     print("Start web")
     thread.append(threading.Thread(target=app.run))
 
-    print("Start UDP")
-    thread.append(threading.Thread(target=sender.stateMachine, daemon=True))
+    # print("Start UDP")
+    # thread.append(threading.Thread(target=sender.stateMachine, daemon=True))
 
-    print("Start joysticks")
-    thread.append(threading.Thread(target=joysticks.mainLoop, daemon=True))
+    # print("Start joysticks")
+    # thread.append(threading.Thread(target=joysticks.mainLoop, daemon=True))
 
     for thr in thread:
         thr.start()
 
     print("Start loop")
     start_time = time.time()
-
+    loop_time  = time.time()
     while True:
-        elapsed_time = time.time() - start_time
-        # print('Elapsed time: ', elapsed_time)
+        elapsed_time = time.time() - loop_time
+        loop_time = time.time()
+        
         start_time = time.time()
+        sender.stateMachine()
+        state_machine_time  = start_time - time.time()
+        
+        start_time = time.time()
+        joysticks.worker()
+        joysticks_time  = start_time - time.time()
 
         if sender.state == "work":
             i = 0
             # get id, ip, state и battery
-            for key, data in sender.robotsData.items():
+            for data in sender.robotsData.values():
                 robotList[i].robotData = data
                 i += 1
 
@@ -78,7 +85,6 @@ def main(args=None):
             for robot in robotList:
                 if sender.robotsData.get(robot.robotData.robot_id) is not None:
                     sender.robotsData[robot.robotData.robot_id] = robot.robotData
-
         time.sleep(0.01)
 
 

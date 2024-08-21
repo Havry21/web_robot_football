@@ -40,21 +40,21 @@ class JoystickReader:
         self.done = False
         pygame.init()
 
-    def mainLoop(self):
-        while not self.done:
+    def worker(self):
+        if not self.done:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    done = True
+                match event.type:
+                    case pygame.QUIT:
+                        self.done = True
+                
+                    case pygame.JOYDEVICEADDED:
+                        joy = Joystick(pygame.joystick.Joystick(event.device_index))
+                        self.joysticks[joy.joystick.get_instance_id()] = joy
+                        print(f"Joystick {joy.joystick.get_instance_id()} connencted")
 
-                if event.type == pygame.JOYDEVICEADDED:
-                    joy = Joystick(pygame.joystick.Joystick(event.device_index))
-                    self.joysticks[joy.joystick.get_instance_id()] = joy
-                    print(f"Joystick {joy.joystick.get_instance_id()} connencted")
-
-                if event.type == pygame.JOYDEVICEREMOVED:
-                    del self.joysticks[event.instance_id]
-                    print(f"Joystick {event.instance_id} disconnected")
+                    case pygame.JOYDEVICEREMOVED:
+                        del self.joysticks[event.instance_id]
+                        print(f"Joystick {event.instance_id} disconnected")
 
             for joystick in self.joysticks.values():
                 joystick.printValue()
-            time.sleep(0.01)
