@@ -3,7 +3,6 @@ import time
 from flask import Flask, render_template, request
 from flask import jsonify
 import threading
-
 from Robot import Robot, RobotData
 import Joystick
 import udpSender
@@ -44,13 +43,7 @@ def main(args=None):
     joysticks = Joystick.JoystickReader()
 
     print("Start web")
-    thread.append(threading.Thread(target=app.run))
-
-    # print("Start UDP")
-    # thread.append(threading.Thread(target=sender.stateMachine, daemon=True))
-
-    # print("Start joysticks")
-    # thread.append(threading.Thread(target=joysticks.mainLoop, daemon=True))
+    thread.append(threading.Thread(target=lambda : app.run(host="0.0.0.0")))
 
     for thr in thread:
         thr.start()
