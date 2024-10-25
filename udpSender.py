@@ -28,11 +28,15 @@ class UDPConvers(metaclass=SingletonMeta):
     robotsData = dict()
     prev_robots_data = dict()
 
-    def __init__(self):
+    def __init__(self,id):
         print("Construct class")
         self.localSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.localSock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.localSock.bind(("0.0.0.0", self.localPort))
+        if(id == 1 or id == 0):
+            self.msg1 = struct.pack('!B', id)
+        else:
+            print("error in adress")
 
     def stopSession(self):
         print("Stop session")

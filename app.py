@@ -6,6 +6,7 @@ import threading
 from Robot import Robot, RobotData
 import Joystick
 import udpSender
+import sys
 
 app = Flask(__name__)
 
@@ -39,7 +40,8 @@ def get_parameters_3():
 
 def main(args=None):
     thread = list()
-    sender = udpSender.UDPConvers()
+    sender = udpSender.UDPConvers(int(sys.argv[1]))
+    print(int(sys.argv[1]))
     joysticks = Joystick.JoystickReader()
 
     print("Start web")
