@@ -32,7 +32,7 @@ class UDPConvers(metaclass=SingletonMeta):
         print("Construct class")
         self.localSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.localSock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.localSock.bind(("0.0.0.0", self.localPort))
+        self.localSock.bind(("255.255.255.255", self.localPort)) # 0.0.0.0
         if(id == 1 or id == 0):
             self.msg1 = struct.pack('!B', id)
         else:
