@@ -18,21 +18,22 @@ class SingletonMeta(type):
 
 class UDPConvers(metaclass=SingletonMeta):
     state = "idle"
-    localPort = 5005
+    localPort = 9434
     broadCastPort = 5006
     start_time = time.time()
 
     msg4 = struct.pack('!B', 3)
     msg1 = struct.pack('!B', 1)
-
+    #<broadcast>
+    typeOfAddress = "172.20.10.255"
     robotsData = dict()
     prev_robots_data = dict()
 
     def __init__(self,id):
         print("Construct class")
-        self.localSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.localSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.localSock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.localSock.bind(("0.0.0.0", self.localPort)) # 0.0.0.0
+        self.localSock.bind(( "0.0.0.0", self.localPort)) # 0.0.0.0
         if(id == 1 or id == 0):
             self.msg1 = struct.pack('!B', id)
         else:
@@ -50,7 +51,7 @@ class UDPConvers(metaclass=SingletonMeta):
         print("Start init")
         start_time = time.time()
         responses = 0
-        self.localSock.sendto(self.msg1, ('<broadcast>', self.localPort))
+        self.localSock.sendto(self.msg1, (self.typeOfAddress, self.localPort))
         self.localSock.settimeout(1.0)
 
         while responses < 1: #and time.time() - start_time < 10:
@@ -67,8 +68,8 @@ class UDPConvers(metaclass=SingletonMeta):
                         self.robotsData[data[1]] = copy.deepcopy(_robotData)
 
             except socket.timeout:
-                self.localSock.sendto(self.msg1, ('<broadcast>', self.localPort))
-                self.localSock.settimeout(2.0)
+                self.localSock.sendto(self.msg1, (self.typeOfAddress, self.localPort))
+                self.localSock.settimeout(0.5)
                 print("Error in receive")
 
 
