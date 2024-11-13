@@ -32,7 +32,7 @@ class UDPConvers(metaclass=SingletonMeta):
         print("Construct class")
         self.localSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.localSock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.localSock.bind(("255.255.255.255", self.localPort)) # 0.0.0.0
+        self.localSock.bind(("0.0.0.0", self.localPort)) # 0.0.0.0
         if(id == 1 or id == 0):
             self.msg1 = struct.pack('!B', id)
         else:
@@ -53,7 +53,7 @@ class UDPConvers(metaclass=SingletonMeta):
         self.localSock.sendto(self.msg1, ('<broadcast>', self.localPort))
         self.localSock.settimeout(1.0)
 
-        while responses < 2: #and time.time() - start_time < 10:
+        while responses < 1: #and time.time() - start_time < 10:
             try:
                 data, addr = self.localSock.recvfrom(1024)
                 if data[0] == 2:

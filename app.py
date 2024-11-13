@@ -40,8 +40,8 @@ def get_parameters_3():
 
 def main(args=None):
     thread = list()
-    sender = udpSender.UDPConvers(int(sys.argv[1]))
-    print(int(sys.argv[1]))
+    sender = udpSender.UDPConvers(1)
+    # print(int(sys.argv[1]))
     joysticks = Joystick.JoystickReader()
 
     print("Start web")
